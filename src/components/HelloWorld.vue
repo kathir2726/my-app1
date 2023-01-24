@@ -1,58 +1,105 @@
 <template>
-  <div class="hello">
-    <h1>{{ msg }}</h1>
-    <p>
-      For a guide and recipes on how to configure / customize this project,<br>
-      check out the
-      <a href="https://cli.vuejs.org" target="_blank" rel="noopener">vue-cli documentation</a>.
-    </p>
-    <h3>Installed CLI Plugins</h3>
-    <ul>
-      <li><a href="https://github.com/vuejs/vue-cli/tree/dev/packages/%40vue/cli-plugin-babel" target="_blank" rel="noopener">babel</a></li>
-      <li><a href="https://github.com/vuejs/vue-cli/tree/dev/packages/%40vue/cli-plugin-router" target="_blank" rel="noopener">router</a></li>
-    </ul>
-    <h3>Essential Links</h3>
-    <ul>
-      <li><a href="https://vuejs.org" target="_blank" rel="noopener">Core Docs</a></li>
-      <li><a href="https://forum.vuejs.org" target="_blank" rel="noopener">Forum</a></li>
-      <li><a href="https://chat.vuejs.org" target="_blank" rel="noopener">Community Chat</a></li>
-      <li><a href="https://twitter.com/vuejs" target="_blank" rel="noopener">Twitter</a></li>
-      <li><a href="https://news.vuejs.org" target="_blank" rel="noopener">News</a></li>
-    </ul>
-    <h3>Ecosystem</h3>
-    <ul>
-      <li><a href="https://router.vuejs.org" target="_blank" rel="noopener">vue-router</a></li>
-      <li><a href="https://vuex.vuejs.org" target="_blank" rel="noopener">vuex</a></li>
-      <li><a href="https://github.com/vuejs/vue-devtools#vue-devtools" target="_blank" rel="noopener">vue-devtools</a></li>
-      <li><a href="https://vue-loader.vuejs.org" target="_blank" rel="noopener">vue-loader</a></li>
-      <li><a href="https://github.com/vuejs/awesome-vue" target="_blank" rel="noopener">awesome-vue</a></li>
-    </ul>
-  </div>
+    <div>
+      <div style="display: flex;margin: 10px;">
+      <div style="width: 50%;margin: 10px;">
+        <span style="margin: 10px;">
+          <label for="cars">Country Dropdown:</label>
+          <select name="cars" id="cars" @change="getState(selectedCountry)" v-model="selectedCountry">
+            <option v-for="(country, i) in country.data" :key="i" :value="country.name">{{ country.name }}</option>
+          </select>
+        </span>
+        <br />
+        <span style="margin: 10px;">
+          <label for="cars">Name Input:</label>
+          <input type="text" v-model="countryName" label="Name" />
+        </span>
+        </div>
+      <div style="width: 50%;margin: 10px;">
+        <p><b>Country Information By:</b> {{ countryName }}</p>
+        <p><b>ISO Code:</b> {{ selectedCountryCode }}</p>
+        <p><b>Currency:</b> {{ selectedCurrencyCode }}</p>
+      </div>
+    </div>
+      <div> 
+        <label for="cars">State Name Search:</label>
+        <input type="text" v-model="stateName" @change="getState(stateName)" label="State Name Search" />
+        <br />
+        <br/>
+        <table v-if="states.length !== 0">
+          <tr>
+            <th>SL.No</th>
+            <th>State Name</th>
+            <th>Code</th>
+          </tr>
+          <tr v-for="(state, i) in states" :key="i">
+            <td>{{ i+1 }}</td>
+            <td>{{ state.name }}</td>
+            <td>{{ state.state_code }}</td>
+          </tr>
+        </table>
+        <div v-else>No data</div>
+      </div>
+    </div>
 </template>
 
 <script>
+
 export default {
   name: 'HelloWorld',
-  props: {
-    msg: String
+
+  data: () => ({
+    country: [],
+    name: '',
+    states: '',
+    selectedCountry: '',
+    columns: {},
+    selectedCountryCode: '',
+    selectedCurrencyCode: '',
+    countryName: '',
+    stateName: ''
+  }),
+  compatConfig: { MODE: 2 },
+  created() {
+    console.log('Helloworld');
+    this.getCountryList()
+  },
+  methods: {
+    getCountryList() {
+      this.axios.get('https://countriesnow.space/api/v0.1/countries/states').then((response) => {
+        this.country = response.data;
+      })
+    },
+    getState(country) {
+      for (let i = 0; i <= this.country.data.length - 1; i++) {
+        if (country === this.country.data[i].name) {
+          this.selectedCountryCode = this.country.data[i].iso3;
+          this.selectedCurrencyCode = this.country.data[i].iso2;
+          this.states = this.country.data[i].states;
+          this.countryName = this.country.data[i].name;
+        }
+      }
+    }
   }
-}
+};
 </script>
 
-<!-- Add "scoped" attribute to limit CSS to this component only -->
-<style scoped>
-h3 {
-  margin: 40px 0 0;
+<style>
+select, input {
+  border: 1px solid;
 }
-ul {
-  list-style-type: none;
-  padding: 0;
+table {
+  font-family: arial, sans-serif;
+  border-collapse: collapse;
+  width: 100%;
 }
-li {
-  display: inline-block;
-  margin: 0 10px;
+
+td, th {
+  border: 1px solid #dddddd;
+  text-align: left;
+  padding: 8px;
 }
-a {
-  color: #42b983;
+
+tr:nth-child(even) {
+  background-color: #dddddd;
 }
 </style>
